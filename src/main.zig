@@ -28,6 +28,8 @@ pub fn main() !void {
 
     var duration_seconds: f64 = 25.0 * 60.0;
     var completion_message: []const u8 = "Time's up!";
+    var start_message: []const u8 = "Starting timer:";
+
 
     while (args.next()) |arg| {
         if (std.mem.eql(u8, arg, "-h") or std.mem.eql(u8, arg, "--help")) {
@@ -69,18 +71,25 @@ pub fn main() !void {
                 std.debug.print("Error: --message requires a value\n", .{});
                 return;
             }
-        } else {
-            std.debug.print("Error: Unknown argument '{s}'\n", .{arg});
-            printUsage();
-            return;
-        }
+        } else if (std.mem.eql(u8, arg, "-sm") or std.mem.eql(u8, arg, "--start-message")) {
+    if (args.next()) |msg| {
+        start_message = msg;
+    } else {
+        std.debug.print("Error: --start-message requires a value\n", .{});
+        return;
     }
+} else {
+    std.debug.print("Error: Unknown argument '{s}'\n", .{arg});
+    printUsage();
+    return;
+}
+}
 
-    // const total_minutes = @as(u32, @intFromFloat(duration_seconds / 60.0));
-    // const remaining_seconds = @as(u32, @intFromFloat(@mod(duration_seconds, 60.0)));
+    const total_minutes = @as(u32, @intFromFloat(duration_seconds / 60.0));
+    //const remaining_seconds = @as(u32, @intFromFloat(@mod(duration_seconds, 60.0)));
     //
     // std.debug.print("Starting timer: {d:0>2}:{d:0>2}\n", .{ total_minutes, remaining_seconds });
-    std.debug.print("\x1b[33mWORKING COMMENCE NOW!!!\n", .{});
+    std.debug.print("\x1b[1;31m{s} || {d} m\x1b[0m\n", .{ start_message, total_minutes });
 
     const stdout = std.io.getStdOut().writer();
     var timer = try std.time.Timer.start();
@@ -179,5 +188,5 @@ pub fn main() !void {
     try stdout.print("\x1b[0m", .{});
     try stdout.print("] 100.0%\n", .{});
 
-    try stdout.print("{s}\n", .{completion_message});
+    try stdout.print("\x1b[1;35m{s}\n", .{completion_message});
 }
